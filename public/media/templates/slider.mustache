@@ -1,0 +1,16 @@
+    - obj: "p[[page_id]]b[[haspid]]" #slider
+      properties:
+        "val": '{{ state_attr("[[hass_entityid]]","brightness") }}'
+      event:
+        "change":
+          - service: light.turn_on
+            data:
+              brightness: "{{ val }}"
+            target:
+              entity_id: [[hass_entityid]]
+        "up":
+          - service: light.turn_on
+            data:
+              brightness: "{{ val }}"
+            target:
+              entity_id: [[hass_entityid]]

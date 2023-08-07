@@ -1,0 +1,8 @@
+    - obj: "p[[page_id]]b[[haspid]]" # Button
+      properties:
+        "val": '{{ 1 if is_state("[[hass_entityid]]", "on") else 0 }}'
+        "text": '{{ "\uE6E8" if is_state("[[hass_entityid]]", "on") else "\uE335" | e }}'
+      event:
+        "[[hass_event]]":
+          - service: light.toggle
+            entity_id: "[[hass_entityid]]"

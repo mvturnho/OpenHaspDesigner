@@ -1,0 +1,37 @@
+{
+  "name": "openhasp-designer",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.12.3",
+    "@popperjs/core": "^2.11.7",
+    "autoprefixer": "^10",
+    "file-saver": "^2.0.5",
+    "js-yaml": "^4.1.0",
+    "konva": "^9.0.2",
+    "mustache": "^4.2.0",
+    "postcss": "^8",
+    "tailwindcss": "^3",
+    "uuid": "^9.0.0",
+    "vue": "^3.3.4",
+    "vue-color-kit": "^1.0.5",
+    "vue-konva": "^3.0.2",
+    "vue-spinner": "^1.0.4",
+    "vue3-colorpicker": "^2.1.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.3.1",
+    "vite": "^4.1.4",
+    "vue-cli-plugin-tailwind": "~3.0.0"
+  }
+}
