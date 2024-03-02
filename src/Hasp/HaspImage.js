@@ -11,7 +11,7 @@ export default class HaspImage extends HaspObject {
     canTransform = false;
 
     image;
-    image_src = 'http://192.168.1.63:8123/local/openhasp/info_icon.png'//'/media/hasp/haspImage.png';
+    image_src = '/media/hasp/haspImage.png';
     imageObj;
     zoom = 1;
     initialImageSize;

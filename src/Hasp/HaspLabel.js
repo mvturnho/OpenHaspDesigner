@@ -17,12 +17,14 @@ export default class HaspLabel extends HaspObject {
     config.align ??= 'center';
     config.border_width ??= 0;
     super(config);
+    config.text_font ??= this.theme.font_size;
     this.haspid = config.haspid;
     this.setRadius(config.radius);
     this.rect.opacity(0);
     this.setBorderWidth(config.border_width);
     this.bgColor = undefined;
     this.text = config.text;
+    this.text_font = config.text_font;
     this.hasp_enabled = true;
 
     this.textObj = new Konva.Text({
@@ -56,5 +58,9 @@ export default class HaspLabel extends HaspObject {
     this.fgColor = color;
     this.textObj.fill(this.fgColor)
   }
+
+  adjust() {
+    this.textObj.fontSize(this.text_font);
+}
 
 }
