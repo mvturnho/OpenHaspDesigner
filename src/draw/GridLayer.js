@@ -214,16 +214,10 @@ class GridLayer extends Layer {
                 const tab = selectedNode.attrs.tab;
                 this.haspobject = tab.tabview;
                 this.haspobject.setSelectedTab(tab);
-                // this.haspobject.moveToTop();
-                // this.transformer.moveToTop();
                 this.haspobject.drawTabs();
             } else {
                 //set properties
                 this.transformer.moveToTop();
-                // if (selectedNode.attrs.type != 'gridLine') {
-                // if (selectedNode instanceof HaspObject) {
-                //     this.layerCallback(this.haspobject)
-                // }
             }
             this.showObjectMenu(this.haspobject);
         } else {
@@ -317,7 +311,7 @@ class GridLayer extends Layer {
                 element.dispatchEvent(event);
             }
         });
-        
+
     }
 
     setNodeProperties(properties) {
@@ -362,8 +356,9 @@ class GridLayer extends Layer {
 
     addPage(config) {
         // this.object_id = 1;
-        if (config.haspid !== undefined)
-            this.panel_id = config.haspid
+        // console.log("AddPage " + config.page)
+        if (config.page !== undefined)
+            this.panel_id = config.page
         config.haspid = this.panel_id++;
         config.theme = this.theme;
         config.width = this.pageWidth;
@@ -390,7 +385,7 @@ class GridLayer extends Layer {
     }
 
     getObjectEvents() {
-        var actions = ['down', 'up','long','hold','release','changed'];
+        var actions = ['down', 'up', 'long', 'hold', 'release', 'changed'];
         // this.getChildren().forEach(page => {
         //     if (page instanceof HaspPage) {
         //         actions.push('p' + page.haspid);
@@ -399,15 +394,25 @@ class GridLayer extends Layer {
         return actions;
     }
 
+    getPagenumbers() {
+        var commands = [];
+        this.getChildren().forEach(page => {
+            if (page instanceof HaspPage) {
+                commands.push(page.haspid);
+            }
+        });
+        return commands;
+    }
+
     getObjectCommands(objectEvent) {
         // console.log(objectEvent)
         var commands = [
-            'backlight off','backlight on',
-            'discovery', 'restart','reboot','screenshot',
-            'sensors','calibrate','factoryreset', 
+            'backlight off', 'backlight on',
+            'discovery', 'restart', 'reboot', 'screenshot',
+            'sensors', 'calibrate', 'factoryreset',
             'statusupdate',
             'idle off', 'idle short', 'idle long',
-            'page next','page prev','page back','clearpage all'
+            'page next', 'page prev', 'page back', 'clearpage all'
         ];
         this.getChildren().forEach(page => {
             if (page instanceof HaspPage) {
@@ -419,15 +424,19 @@ class GridLayer extends Layer {
     }
 
     findPage(id) {
+        // console.log("Search page: " + id)
+        var fpage = undefined;
         this.getChildren().forEach(page => {
             if (page instanceof HaspPage) {
-                // console.log("PAGE")
                 // console.log(page)
-                if (page.attrs.haspid == id)
-                    return page;
+                if (page.haspid == id) {
+                    // console.log("FOUND PAGE " + page.haspid)
+                    fpage = page;
+                    return;
+                }
             }
         });
-        return undefined;
+        return fpage;
     }
 
     addObject(config) {
@@ -440,6 +449,7 @@ class GridLayer extends Layer {
                 return
             //here we should ask the page for a new id
             config.haspid = this.activePage.getNextId();
+            // console.log(this.activePage)
             config.theme = this.theme;
             config.show_id = this.showId;
             let newObject;
@@ -477,20 +487,31 @@ class GridLayer extends Layer {
             if (parents) {
                 this.haspobject = parents[0].container
             }
-        } else if (config.page) {
+        } else if (config.page !== undefined) {
             //find the page as the parent
+            // console.log("FIND PAGE")
             const page = this.findPage(config.page);
-            if (page !== undefined)
+            // console.log("THIS: " + page)
+            if (page)
                 this.haspobject = page;
-            else
-                this.haspobject = this.activePage;
+            else {
+                this.addPage({ "page": config.page })
+            }
+            // console.log(this.haspobject)
         } else {
             //if no parent container or specific page was found then use the activepage
+            console.log("NO Parent")
             this.haspobject = this.activePage;
         }
         //now we know where to add the new object
         //create the new object
-        newObject = new objectTypelookup[config.type](config)
+        console.log("NEW OBJECT " + config.type)
+        if (config.type in objectTypelookup) {
+            newObject = new objectTypelookup[config.type](config)
+        } else {
+            newObject = new HaspObject(config);
+
+        }
         if (newObject) {
             if (newObject.isContainer()) {
                 //when we have a container object save it to the containers store

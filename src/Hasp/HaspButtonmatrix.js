@@ -30,7 +30,6 @@ export default class HaspButtonmatrix extends HaspObject {
 
         this.moveButton = new MoveButton({ x: 0, y: this.height() - 20, width: 20, height: 20 });
         this.add(this.moveButton);
-
     }
 
     /**

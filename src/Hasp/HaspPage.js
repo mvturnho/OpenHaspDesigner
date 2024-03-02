@@ -13,6 +13,9 @@ export default class HaspPage extends HaspObject {
   radius = undefined; //Page has no radius
   borderColor = undefined;
 
+  page_limit_command;
+  page_limit_number;
+
   top_haspid = 1;
 
   constructor(config) {
@@ -39,21 +42,26 @@ export default class HaspPage extends HaspObject {
 
   setNextId(nextid) {
     if (nextid > this.top_haspid) {
-      console.log('page:' + this.haspid + ' top:' + this.top_haspid + ' next' + nextid)
+      // console.log('page:' + this.haspid + ' top:' + this.top_haspid + ' next' + nextid)
       this.top_haspid = nextid;
     } else {
-      console.log('NO page:' + this.haspid + ' top:' + this.top_haspid + ' next' + nextid)
+      // console.log('NO page:' + this.haspid + ' top:' + this.top_haspid + ' next' + nextid)
     }
   }
 
   //{"page":1,"comment":"---------- Page 1 ----------"}
   export(page, exportData) {
     exportData.push({ page: this.haspid, comment: "----------- page " + this.haspid + " ------- " });
+    if(this.page_limit_command) {
+      var cmd = this.page_limit_command;
+      exportData.push({page: this.haspid , id:0, [this.page_limit_command]: this.page_limit_number })
+    }    
     this.getChildren().forEach(element => {
       if (element instanceof HaspObject) {
         element.export(page, exportData);
       }
     });
+
   }
 
   async hassConfigExport() {
@@ -74,10 +82,10 @@ export default class HaspPage extends HaspObject {
               expobj.push(output);
             }).catch((e) => console.log(e))
         }
-        console.log('done ' + element.haspid);
+        // console.log('done ' + element.haspid);
       }
     });
-    console.log('page exp ' + this.haspid)
+    // console.log('page exp ' + this.haspid)
     // console.log(expobj)
     return expobj;
   }

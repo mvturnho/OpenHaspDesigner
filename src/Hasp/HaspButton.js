@@ -20,11 +20,10 @@ export default class HaspButton extends HaspObject {
     config.height ??= 40;
     config.text ??= 'Button';
     config.entity_id ??= ''; //make sure this object can set its entityid
+    config.radius ??= config.theme.button_radius;
     super(config);
-    // config.radius = this.height() / 2;
     this.haspid = config.haspid;
-    this.setRadius(config.radius);
-
+    
     this.text = config.text;
     this.hasp_enabled = true;
 
@@ -34,7 +33,7 @@ export default class HaspButton extends HaspObject {
       width: this.width(),
       verticalAlign: 'middle',
       text: this.text,
-      // fontSize: config.text_font,
+      fontSize: config.text_font,
       fontFamily: 'Calibri',
       fill: this.fgColor,
       listening: false,
@@ -64,6 +63,7 @@ export default class HaspButton extends HaspObject {
   }
 
   setFgColor(color) {
+    this.save_text_color = true;
     this.fgColor = color;
     this.textObj.fill(this.fgColor)
   }
@@ -71,10 +71,6 @@ export default class HaspButton extends HaspObject {
   setToggle(toggle) {
     // console.log(toggle)
     this.toggle = toggle;
-  }
-
-  objectExport(page, objectData) {
-    objectData.radius = this.rect.cornerRadius();
   }
 
   async hassConfigExport() {

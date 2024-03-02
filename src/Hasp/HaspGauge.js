@@ -34,6 +34,7 @@ export default class HaspGauge extends HaspObject {
         config.max ??= this.max;
         config.critical_value ??= this.critical_value;
         config.val ??= this.val;
+        config.text_font ??= 20;
         this.text_font = config.text_font;
         this.haspid = config.haspid;
         this.hasp_enabled = true;
@@ -226,6 +227,7 @@ export default class HaspGauge extends HaspObject {
         if (this.hasp_type !== 0) objectData.type = this.hasp_type;
         if (this.hasp_rotation > 0) objectData.rotation = this.hasp_rotation;
         if (this.angle !== 240) objectData.angle = this.angle;
+        if (this.text_font !== undefined) objectData.text_font = this.text_font;
         
         if(this.rect.cornerRadius() === this.height() / 2) objectData.radius = undefined ;
     }
@@ -239,7 +241,7 @@ export default class HaspGauge extends HaspObject {
           object.obj = 'p' + page.haspid + 'b' + this.haspid + ' # Gauge';
           object.properties = {};
           object.properties.val = '{{ states("' + this.hass_entityid + '") }}';
-          hassConfig.push(object)
+        //   hassConfig.push(object)
         // }
       }
       

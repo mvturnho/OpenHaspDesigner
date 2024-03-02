@@ -53,7 +53,7 @@ export default class HaspMsgbox extends HaspObject {
         var x = this.margin;
         const bw = ((this.width()) / (this.options.length)) - (this.margin);
         this.options.forEach((btn, index) => {
-            console.log('add ' + btn.text)
+            // console.log('add ' + btn.text)
             var config = { x: x, y: y, width: bw, type: 'msgbutton', text: btn.text, radius: 20, theme: this.theme, index: index };
             this.addButton(config);
             x += (bw) + this.padding;

@@ -12,7 +12,16 @@ import Select from './components/form/Select.vue'
 import Checkbox from './components/form/Checkbox.vue'
 import Position from './components/form/Position.vue'
 
-// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+/* import specific icons */
+import { faPlusCircle, faTrashCan, faUserSecret } from '@fortawesome/free-solid-svg-icons'
+/* add icons to the library */
+library.add(faUserSecret);
+library.add(faPlusCircle);
+library.add(faTrashCan);
 
 // import './components';
 const app = createApp(App);
@@ -24,7 +33,7 @@ app.component("form-Position",Position);
 app.component("form-select",Select);
 app.component("form-checkbox", Checkbox);
 app.component("form-group",FormGroup);
-// app.component('font-awesome-icon', FontAwesomeIcon);
+app.component('font-awesome-icon', FontAwesomeIcon);
 
 app.use(VueKonva);
 app.mount('#app');

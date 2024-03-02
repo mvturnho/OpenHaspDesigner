@@ -10,6 +10,9 @@ export default class HaspSlider extends HaspBar {
     hasAction = false;
     bg_color20 = "white";
 
+    minWidth = 20;
+    minHeight = 20;
+
     constructor(config) {
         config.entity_id ??= ''; //make sure this object can set its entityid
         super(config);
@@ -27,22 +30,21 @@ export default class HaspSlider extends HaspBar {
 
         //enables the button to change thye value
         this.knob.on('dragmove', (e) => {
-            if (this.height() < this.width()) {
+            if (this.isHorizontal) {
                 this.knob.y((this.height() / 2))
                 if (this.knob.x() < 0) this.knob.x(0);
                 if (this.knob.x() > this.width()) this.knob.x(this.width());
                 const newVal = (this.knob.x() / this.width()) * (this.max - this.min);
                 this.val = Math.round(newVal);
-                const pos = super.adjust();
-                this.knob.x(pos);
+                const pos = this.adjust();
             } else {
                 this.knob.x((this.width() / 2))
                 if (this.knob.y() < 0) this.knob.y(0);
                 if (this.knob.y() > this.height()) this.knob.y(this.height());
-                const newVal = (this.knob.y() / this.height()) * (this.max - this.min);
+
+                const newVal = this.max -( (this.knob.y() / this.height()) * (this.max - this.min));
                 this.val = Math.round(newVal);
-                const pos = super.adjust();
-                this.knob.y(pos);
+                const pos = this.adjust();
             }
         });
 
@@ -77,8 +79,13 @@ export default class HaspSlider extends HaspBar {
     }
 
     adjust() {
-        const x = super.adjust();
-        this.knob.x(posx);
+        const pos = super.adjust();
+        if (this.isHorizontal) {
+            this.knob.x(pos);
+        } else {
+            this.knob.y(pos);
+        }
+
     }
 
     async hassConfigExport(page, hassConfig) {
@@ -89,7 +96,7 @@ export default class HaspSlider extends HaspBar {
             .then((template) => {
                 const rendered = mustache.render(template, { page_id: page.haspid, haspid: this.haspid, hass_entityid: this.hass_entityid });
                 // console.log(rendered);
-                hassConfig.push(rendered)
+                // hassConfig.push(rendered)
             });
 
     }

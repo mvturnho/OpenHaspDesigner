@@ -117,6 +117,7 @@ export default class ScaleStage extends Stage {
     }
 
     drawGrid() {
+        return
         const width = window.innerWidth;
         const height = window.innerHeight;
         this.gridLayer.clear();

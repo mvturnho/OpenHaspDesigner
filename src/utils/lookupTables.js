@@ -16,6 +16,10 @@ import HaspImage from '../Hasp/HaspImage';
 import HaspButtonmatrix from '../Hasp/HaspButtonmatrix';
 import HaspMsgbox from '../Hasp/HaspMsgbox';
 import HaspKeypad from '../Hasp/HaspKeypad';
+import HaspDropdown from '../Hasp/HaspDropdown';
+import HaspSpinner from '../Hasp/HaspSpinner';
+import HaspRoller from '../Hasp/HaspRoller';
+import HaspColorpicker from '../Hasp/HaspColorpicker';
 
 
 const lookupPageSize = {
@@ -44,12 +48,12 @@ const objectTypelookup = {
     'gauge': HaspGauge,
     'btnmatrix': HaspButtonmatrix,
     'kpad': HaspKeypad,
-    // 'cpicker': HaspObject,
-    // 'dropdown': HaspObject,
+    'cpicker': HaspColorpicker,
+    'dropdown': HaspDropdown,
     'led': HaspLed,
     // 'msgbox': HaspMsgbox,
-    // 'roller': HaspObject,
-    // 'spinner': HaspArc,
+    'roller': HaspRoller,
+    'spinner': HaspSpinner,
 }
 
 const lookupIcon = {

@@ -4,24 +4,28 @@ import { v4 as uuidv4 } from 'uuid';
 import HaspObject from './HaspObject';
 import { Rect } from 'konva/lib/shapes/Rect';
 
-export default class HaspSlider extends HaspObject {
+export default class HaspBar extends HaspObject {
     hasAction = false;
 
     max = 100;
     min = 0;
     val = 0;
 
-    minWidth = 20;
-    minHeight = 20;
+    minWidth = 10;
+    minHeight = 10;
+
+    isHorizontal = true;
 
     constructor(config) {
         config.width ??= 200;
         config.height ??= 20;
+        config.val ??= 0;
         super(config);
         this.haspid = config.haspid;
         this.setRadius(this.height() / 2);
         this.setFill(this.theme.secondary_color);
         this.hasp_enabled = true;
+        this.val = config.val;
 
         this.valRect = new Konva.Rect({
             id: uuidv4(),
@@ -39,10 +43,12 @@ export default class HaspSlider extends HaspObject {
         })
 
         this.on('transform', function () {
+            this.adjust();
             this.updateSize();
         });
 
         this.on('transformend', function () {
+            this.adjust();
             this.updateSize();
         });
 
@@ -52,10 +58,12 @@ export default class HaspSlider extends HaspObject {
 
     updateSize() {
         if (this.height() < this.width()) {
+            this.isHorizontal = true;
             this.valRect.height(this.height())
             this.setRadius(this.height());
             this.valRect.cornerRadius(this.height() / 2);
         } else {
+            this.isHorizontal = false;
             this.valRect.width(this.width())
             this.setRadius(this.width());
             this.valRect.cornerRadius(this.width() / 2);
@@ -71,20 +79,24 @@ export default class HaspSlider extends HaspObject {
         if (this.val < this.min)
             this.val = this.min
         var pos = 0;
-        if (this.height() < this.width()) {
+        // if (this.height() < this.width()) {
+        if (this.isHorizontal) {
             pos = ((this.val - this.min) / (this.max - this.min)) * this.width()
         } else {
-            pos = ((this.val - this.min) / (this.max - this.min)) * this.height()
+            var tval = this.max - this.val;
+            pos = ((tval - this.min) / (this.max - this.min)) * this.height()
         }
         this.setBarVal(pos);
         return pos;
     }
 
     setBarVal(barPos) {
-        if (this.height() < this.width()) {
+        if (this.isHorizontal) {
+            this.valRect.y(0)
             this.valRect.width(barPos);
         } else {
-            this.valRect.height(barPos);
+            this.valRect.y(barPos)
+            this.valRect.height(this.height() - barPos);
         }
     }
 

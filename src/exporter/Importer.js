@@ -17,7 +17,7 @@ export default class Importer {
             let result = {};
             var lines = content.split('\n');
             for (var line = 0; line < lines.length; line++) {
-                console.log(line + ':  ' + lines[line]);
+                // console.log(line + ':  ' + lines[line]);
                 try {
                     if (lines[line].length < 4)
                         continue
@@ -43,11 +43,23 @@ export default class Importer {
                         }
                         result = config;
                     }
-                    else if (config.obj === undefined && config.page !== undefined){
-                        config.id = undefined;
-                        layer.addPage({ type: "page", haspid: config.page, width: this.pageWidth, height: this.pageHeight, bg_color: this.pageColor });
-                    }  else {
-                        layer.importObject(config);
+                    else if (config.obj === undefined && config.page !== undefined && config.id === undefined) {
+                        layer.addPage({ "page": config.page, type: "page", haspid: config.page, width: this.pageWidth, height: this.pageHeight, bg_color: this.pageColor });
+                    } else {
+                        //detected the navigation limts for pages
+                        if (config.id === 0) {
+                            const page = layer.findPage(config.page);
+                            if(config.prev){
+                                page.page_limit_command = 'prev';
+                                page.page_limit_number = config.prev;
+                            } else if(config.next){
+                                page.page_limit_command = 'next';
+                                page.page_limit_number = config.next;
+                            }
+                            
+                        } else {
+                            layer.importObject(config);
+                        }
                     }
                 } catch (e) {
                     console.log(e)

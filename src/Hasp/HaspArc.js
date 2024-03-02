@@ -3,6 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import HaspObject from './HaspObject';
 
+const ARC_MODE_NORMAL = 0;
+const ARC_MODE_SYMMETRICAL = 1;
+const ARC_MODE_REVERSE = 2;
+
 export default class HaspArc extends HaspObject {
     keepRatio = true;
     canTransform = true;
@@ -12,19 +16,23 @@ export default class HaspArc extends HaspObject {
     max = 100;          //maximum value of the indicator
     val = 0;           //current value of the indicator
     padding = 0;
-    padinc = 8 ;
+    padinc = 8;
     arcWidth = 15;
-    arcRotation = 0;    //offset to the 0 degree position
-    arc_type = 0;           //0 = normal, 1 = symmetrical, 2 = reverse
     adjustable = true; //bool	false	Add knob that the user can operate to change the value
-    start_angle = 20;   //0-360		start angle of the arc background (see note)
-    end_angle = 300;	//end angle of the arc background(see note)
-    start_angle10 = 45  //0-360		start angle of the arc indicator (see note)
-    value_rotation = 120;
-    // start_angle10 = 270 //0-360		start angle of the arc indicator (see note)
+    start_angle = 135;   //0-360		start angle of the arc background (see note)
+    end_angle = 45;	//end angle of the arc background(see note)
+    value_rotation = 0;
+    hasp_rotation = 0;
+
+    hasp_type = ARC_MODE_NORMAL;
+    hasp_type_options = [
+        { value: ARC_MODE_NORMAL, description: "normal" },
+        { value: ARC_MODE_SYMMETRICAL, description: "symmetrical" },
+        { value: ARC_MODE_REVERSE, description: "reverse" }
+    ]
 
     constructor(config) {
-        console.log('ARC')
+        // console.log('ARC')
         config.border_width ??= 0;
         super(config);
         // console.log(config)
@@ -32,36 +40,36 @@ export default class HaspArc extends HaspObject {
         this.hasp_enabled = true;
         this.minWidth = 100;
         this.minHeight = 100;
-
+        config.hasp_rotation ??= this.hasp_rotation;
         // this.setBgColor(this.theme.secondary_color)
-
+        this.hasp_rotation = config.hasp_rotation;
         const halfWidth = config.width / 2;
         const padding = this.padding + this.padinc;
 
-        this.arc = new Konva.Arc({
+        this.bg_arc = new Konva.Arc({
             id: uuidv4(),
             x: halfWidth,
             y: halfWidth,
             type: "arc",
             draggable: false,
-            outerRadius: halfWidth - padding ,
+            outerRadius: halfWidth - padding,
             innerRadius: halfWidth - padding - this.arcWidth,
-            angle: 300,
-            rotation: 120,
+            angle: this.end_angle - this.start_angle,
+            rotation: this.hasp_rotation,
             fill: this.theme.secondary_color,
             stroke: "black",
             strokeWidth: 0,
         });
 
-        this.ring = new Konva.Arc({
+        this.indic_arc = new Konva.Arc({
             id: uuidv4(),
             x: halfWidth,
             y: halfWidth,
             type: "value",
-            outerRadius: halfWidth - padding ,
-            innerRadius: halfWidth - padding  - this.arcWidth,
-            angle: this.getAngle(this.val),
-            rotation: this.value_rotation,
+            outerRadius: halfWidth - padding,
+            innerRadius: halfWidth - padding - this.arcWidth,
+            angle: 0,
+            rotation: this.hasp_rotation,
             fill: this.theme.primary_color,
             // stroke: "black"
             strokeWidth: 0,
@@ -78,9 +86,10 @@ export default class HaspArc extends HaspObject {
             this.repositionArc(this.getLayer().shadowRectangle.width());
         });
 
-        this.add(this.arc);
-        this.add(this.ring);
+        this.add(this.bg_arc);
+        this.add(this.indic_arc);
         this.addKnob();
+        this.adjust();
         this.draggable(true);
     }
 
@@ -97,21 +106,21 @@ export default class HaspArc extends HaspObject {
                 radius: this.arcWidth / 2,
                 fill: this.theme.knob_color,
                 type: "knob",
-                draggable: true,
+                draggable: false,
                 stroke: "#dedede",
                 strokeWidth: 1,
             });
 
             //enables the button to change thye value
-            this.knob.on('dragmove', (e) => {
-                if (this.knob.x() < 0) this.knob.x(0);
-                if (this.knob.x() > this.width()) this.knob.x(this.width());
-                const newVal = (this.knob.x() / this.width()) * (this.max - this.min);
-                this.val = Math.round(newVal);
-                if (this.val > this.max) this.val = this.max;
-                if (this.val < this.min) this.val = this.min;
-                this.adjust();
-            });
+            // this.knob.on('dragmove', (e) => {
+            //     if (this.knob.x() < 0) this.knob.x(0);
+            //     if (this.knob.x() > this.width()) this.knob.x(this.width());
+            //     const newVal = (this.knob.x() / this.width()) * (this.max - this.min);
+            //     this.val = Math.round(newVal);
+            //     if (this.val > this.max) this.val = this.max;
+            //     if (this.val < this.min) this.val = this.min;
+            //     this.adjust();
+            // });
 
             this.add(this.knob);
         }
@@ -121,15 +130,30 @@ export default class HaspArc extends HaspObject {
      * should tahe into account the gap start_angle end_angle
      */
     getAngle() {
-        const factor = ((this.val - this.min) / (this.max - this.min));
-        const angle = factor * (this.end_angle);
+        // const factor = ((this.val - this.min) / (this.max - this.min));
+        // const value_angle = factor * (this.end_angle - this.start_angle);
+
+        var angle = this.hasp_rotation;
+        if (this.hasp_type === ARC_MODE_REVERSE) {
+            angle += this.end_angle;
+        } else if (this.hasp_type === ARC_MODE_NORMAL) {
+            angle += this.start_angle;
+        } else if (this.hasp_type === ARC_MODE_SYMMETRICAL) {
+            var bg_end = this.end_angle;
+            if (this.end_angle < this.start_angle) {
+                bg_end = this.end_angle + 360;
+            }
+            var angle_midpoint = (this.start_angle + bg_end) / 2;
+            angle += angle_midpoint;
+        }
+
         return angle;
     }
 
     getKnobPos() {
         const halfWidth = this.width() / 2;
         const padding = this.padding + this.padinc;
-        const angle = this.getAngle(this.val) + this.value_rotation;
+        var angle = this.getAngle();
 
         const x = (Math.cos(angle * (Math.PI / 180)) * (halfWidth - padding - (this.arcWidth / 2))) + halfWidth;
         const y = (Math.sin(angle * (Math.PI / 180)) * (halfWidth - padding - (this.arcWidth / 2))) + halfWidth;
@@ -139,14 +163,14 @@ export default class HaspArc extends HaspObject {
     repositionArc(width) {
         const halfWidth = (width / 2);
         const padding = this.padding + this.padinc;
-        this.arc.x(halfWidth);
-        this.arc.y(halfWidth);
-        this.arc.outerRadius(halfWidth - padding)
-        this.arc.innerRadius(halfWidth - padding - this.arcWidth)
-        this.ring.x(halfWidth);
-        this.ring.y(halfWidth)
-        this.ring.outerRadius(halfWidth - padding)
-        this.ring.innerRadius(halfWidth - padding - this.arcWidth)
+        this.bg_arc.x(halfWidth);
+        this.bg_arc.y(halfWidth);
+        this.bg_arc.outerRadius(halfWidth - padding)
+        this.bg_arc.innerRadius(halfWidth - padding - this.arcWidth)
+        this.indic_arc.x(halfWidth);
+        this.indic_arc.y(halfWidth)
+        this.indic_arc.outerRadius(halfWidth - padding)
+        this.indic_arc.innerRadius(halfWidth - padding - this.arcWidth)
 
         if (this.adjustable) {
             const knobPos = this.getKnobPos()
@@ -157,7 +181,7 @@ export default class HaspArc extends HaspObject {
 
     themeChange(type, value) {
         if (type === 'primary_color') {
-            this.ring.fill(this.theme.primary_color)
+            this.indic_arc.fill(this.theme.primary_color)
         }
     }
 
@@ -176,28 +200,30 @@ export default class HaspArc extends HaspObject {
         this.addKnob();
     }
 
-    setArcType(type) {
-        // console.log(type)
-        this.arc_type = type;
-        if (type == 0) {
-            this.value_rotation = 120;
-        }
-        else if (this.id(type == 1)) {
-            this.value_rotation = 280;
-
-        }
-        else
-            this.value_rotation = 360;
-        // this.repositionArc(this.width())
-        this.ring.rotation(this.value_rotation)
-        if (this.adjustable) {
-            const knobPos = this.getKnobPos()
-            this.knob.x(knobPos.x);
-            this.knob.y(knobPos.y);
-        }
-    }
-
     adjust() {
+        this.val = Number(this.val);
+        this.min = Number(this.min);
+        this.max = Number(this.max);
+        this.start_angle = Number(this.start_angle);
+        this.end_angle = Number(this.end_angle);
+        this.hasp_rotation = Number(this.hasp_rotation);
+        this.hasp_type = Number(this.hasp_type);
+
+        var angle = this.end_angle - this.start_angle;
+        if (angle < 0) angle += 360;
+        var indic_angle = (this.val / (this.max - this.min)) * angle;
+        if (indic_angle < 0) indic_angle += 360;
+        const rotation = this.hasp_rotation + this.start_angle;
+        console.log(rotation + " " + angle)
+        this.bg_arc.angle(angle);
+        this.bg_arc.rotation(rotation);
+        var indic_rotation = this.hasp_rotation + this.start_angle;
+        if(this.hasp_type = ARC_MODE_SYMMETRICAL){
+            indic_angle = indic_angle /2;
+        }
+        this.indic_arc.angle(indic_angle);
+        this.indic_arc.rotation(indic_rotation);
+
         if (this.val > this.max) this.val = this.max;
         if (this.val < this.min) this.val = this.min;
 
@@ -207,26 +233,23 @@ export default class HaspArc extends HaspObject {
             this.knob.y(knobPos.y);
         }
 
-        const angle = this.getAngle();
-        this.ring.angle(angle);
     }
 
-    objectExport(page,objectData,hassConfig) {
+    objectExport(page, objectData, hassConfig) {
         if (this.padding > 0) {
             objectData.pad_top = this.padding;
             objectData.pad_right = this.padding;
             objectData.pad_left = this.padding;
             objectData.pad_bottom = this.padding;
         }
-        if (this.adjustable)
-            objectData.adjustable = this.adjustable;
+        if (this.adjustable) { objectData.adjustable = this.adjustable; }
+        if (this.hasp_type > 0) { objectData.type = this.hasp_type; }
+        if (this.min !== 0) { objectData.min = this.min; }
+        if (this.max !== 100) { objectData.max = this.max; }
+        if (this.val !== 0) { objectData.val = this.val; }
 
-        if (this.arc_type > 0)
-            objectData.type = this.arc_type;
-
-        objectData.min = this.min;
-        objectData.max = this.max;
-        if (this.val > 0)
-            objectData.val = this.val;
+        if (this.start_angle !== 135) { objectData.start_angle = this.start_angle; }
+        if (this.end_angle !== 45) { objectData.end_angle = this.end_angle; }
+        if (this.hasp_rotation !== 0) { objectData.rotation = this.hasp_rotation; }
     }
 }

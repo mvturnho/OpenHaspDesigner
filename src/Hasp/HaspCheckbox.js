@@ -39,7 +39,7 @@ export default class HaspCheckBox extends HaspObject {
     this.textObj = new Konva.Text({
       x: config.width + 5,
       y: 10,
-      height: 20,
+      height: 15,
       // width: 20,
       verticalAlign: 'middle',
       text: this.text,

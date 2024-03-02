@@ -13,8 +13,9 @@ export default class HaspLabel extends HaspObject {
   constructor(config) {
     config.width ??= 100;
     config.height ??= 40;
-    config.text ??= 'Label'
-    config.border_width ??= 0
+    config.text ??= 'Label';
+    config.align ??= 'center';
+    config.border_width ??= 0;
     super(config);
     this.haspid = config.haspid;
     this.setRadius(config.radius);
@@ -29,6 +30,7 @@ export default class HaspLabel extends HaspObject {
       y: 8,
       verticalAlign: 'middle',
       text: this.text,
+      align: config.align,
       fontSize: this.theme.font_size,
       fontFamily: 'Calibri',
       fill: this.fgColor,

@@ -133,7 +133,7 @@ export default {
       position: { x: 0, y: 0 },
       layer: undefined,
       text: '',
-      gridSize: 20,
+      gridSize: 10,
       haspId: 0,
       showModal: false,
       selectedNode: null,

@@ -20,6 +20,11 @@ export default class HaspObject extends Group {
   event = '';
   command = '';
   enabled = true;
+  // save_bg_color = false;
+  save_border_color = false;
+  save_border_width = false;
+  save_radius = false;
+  save_text_color = false;
 
   border_width = 0;
   radius = 5;
@@ -45,15 +50,10 @@ export default class HaspObject extends Group {
     config.y ??= 0;
     config.width ??= 100;
     config.height ??= 100;
-    config.radius ??= config.theme.radius;
+    config.bg_opa ??= 255;
     config.bg_color ??= config.theme.bg_color;
-    config.border_color ??= config.theme.border_color;
-    config.border_width ??= config.theme.border_width;
 
-    if (config.opacity !== undefined)
-      config.opacity = config.opacity;
-    else
-      config.opacity = 255;
+    config.opacity = config.bg_opa / 255;
 
     super(config);
     const uuid = uuidv4();
@@ -62,8 +62,8 @@ export default class HaspObject extends Group {
 
     this.haspid = config.haspid;
     this.theme = config.theme;
-    this.theme.addChangeListener(this);
     this.type = config.type;
+    if (config.comment !== undefined) this.comment = config.comment;
     if (config.action) {
       Object.entries(config.action).forEach(([key, value]) => {
         // console.log(key, value);
@@ -75,13 +75,29 @@ export default class HaspObject extends Group {
     if (config.entity_id !== undefined) {
       this.hass_entityid = config.entity_id;
     }
-
-    this.radius = config.radius;
-    this.border_width = config.border_width;
-    this.border_color = config.border_color;
+    //Radius
+    if (config.radius !== undefined) {
+      this.radius = config.radius;
+      this.save_radius = true;
+    } else { this.radius = this.theme.radius; }
+    //border_width
+    if (config.border_width !== undefined) {
+      this.border_width = config.border_width;
+      this.save_border_width = true;
+    } else { this.border_width = this.theme.border_width; }
+    //Border_color
+    if (config.border_color !== undefined) {
+      this.border_color = config.border_color;
+      this.save_border_color = true;
+    }
+    else { this.border_color = this.theme.border_color; }
     //config.bg_color is hex6 add opacity to make hex8
-    this.bg_color = config.bg_color + config.opacity.toString(16);
-    // console.log(this.bg_color)
+
+    this.bg_color = config.bg_color; // + config.opacity.toString(16);
+
+    this.bg_color += Number(config.bg_opa).toString(16);
+
+    this.theme.addChangeListener(this);
 
     this.rect = new Konva.Rect({
       id: uuidv4(),
@@ -90,20 +106,22 @@ export default class HaspObject extends Group {
       y: 0,
       width: config.width,
       height: config.height,
-      fill: 'grey',
+      fill: this.bg_color,
       stroke: this.border_color,
       strokeWidth: config.borderWidth,
       draggable: false,
       name: "rect",
       type: this.type,
       selectable: true,
-      cornerRadius: config.radius,
+      cornerRadius: this.radius,
       listening: true,
       opacity: 1,
     });
 
+    //fix maxradius
+    this.setRadius(this.radius);
     //need to filter opacity
-    this.setBgColor();
+    // this.setBgColor();
 
     this.on('transformstart', (e) => {
       // console.log('transform start');
@@ -156,7 +174,7 @@ export default class HaspObject extends Group {
     });
 
     this.on('showid', (e) => {
-      console.log('showid');
+      // console.log('showid');
       this.showIdHandler(e);
     });
 
@@ -252,6 +270,12 @@ export default class HaspObject extends Group {
     // this.height(size.height);
   }
 
+  changeRadius(radius) {
+    // console.log("CHANGE RADIUS")
+    this.save_radius = true;
+    this.setRadius(radius);
+  }
+
   setRadius(radius) {
     this.radius = Number(radius);
     if (this.rect !== undefined) {
@@ -289,6 +313,7 @@ export default class HaspObject extends Group {
   }
 
   setBorderColor(color) {
+    this.save_border_color = true;
     if (this.rect !== undefined) {
       this.rect.stroke(this.border_color);
     }
@@ -302,19 +327,25 @@ export default class HaspObject extends Group {
     //undefined
   }
 
+  /**
+   * We set the bg_color to the full rgbo color red green blue opa
+   * we load bg_color from config.bg_color and add bg_opa
+   * @param {*} hex8color 
+   */
   setBgColor(hex8color) {
     // console.log('setBgColor')
     // console.log(hex8color)
     this.rect.fill(this.bg_color);
-    // const splitColors = splitColorOpa(this.bg_color)
+    const splitColors = splitColorOpa(this.bg_color)
     // console.log(splitColors)
     // this.rect.fill(splitColors.color);
-    // this.rect.opacity(splitColors.opacity);
+    this.opacity(splitColors.opacity);
   }
 
-  // setAction(action) {
-  //   this.action = action;
-  // }
+  changeBgColor() {
+    this.save_bg_color = true;
+    this.rect.fill(this.bg_color);
+  }
 
   themeChange() {
   }
@@ -322,11 +353,19 @@ export default class HaspObject extends Group {
   objectExport() {
   }
 
+  /**
+   * 
+   * @param {You may implement a redraw on every object} args 
+   */
+  redraw(args) {
+  }
+
   async hassConfigExport() {
   }
 
   changeColor(type, color) {
     const event = new Event(type);
+    this.redraw(event);
     this.dispatchEvent(event);
   }
 
@@ -338,8 +377,13 @@ export default class HaspObject extends Group {
       objectData = {
         id: this.haspid,
         obj: this.type,
-        x: Math.round(this.x()), y: Math.round(this.y()), w: Math.round(this.width()), h: Math.round(this.height()),
       }
+      if (this.comment !== undefined) objectData.comment = this.comment;
+      objectData.x = Math.round(this.x());
+      objectData.y = Math.round(this.y());
+      objectData.w = Math.round(this.width());
+      objectData.h = Math.round(this.height());
+
       if (!this.hasp_enabled) objectData.enabled = this.hasp_enabled;
       const parent = this.getParent();
       if (parent instanceof HaspObject) {
@@ -349,18 +393,26 @@ export default class HaspObject extends Group {
         }
       }
 
-      objectData.border_color = this.rect.stroke();
-      objectData.border_width = this.rect.strokeWidth();
-      objectData.radius = this.rect.cornerRadius();
+      if (this.save_border_color) objectData.border_color = this.rect.stroke();
+      if (this.save_border_width) objectData.border_width = this.rect.strokeWidth();
+      if (this.save_radius) objectData.radius = this.rect.cornerRadius();
 
-      const splitColors = splitColorOpa(this.rect.fill())
-      objectData.bg_color = splitColors.color;
-      if (splitColors.opacity < 1) objectData.opacity = Number(Math.round(splitColors.opacity * 255))
+      // console.log("BGCOLOR " + this.bg_color)
+      if (this.bg_color != undefined) {
+        const splitColors = splitColorOpa(this.bg_color)
+        if (splitColors.color !== this.theme.bg_color) {
+          // console.log(splitColors)
+          objectData.bg_color = splitColors.color;
+          if (splitColors.opacity < 1) {
+            objectData.bg_opa = Number(Math.round(splitColors.opacity * 255));
+          }
+        }
+      }
       if (this.enabled === false) objectData.enabled = false;
 
       if (this.textObj !== undefined) {
         objectData.text = this.text;
-        objectData.text_color = this.textObj.fill();
+        if (this.save_text_color) objectData.text_color = this.textObj.fill();
       }
       if (this.bg_color10 !== undefined) objectData.bg_color10 = this.bg_color10;
       if (this.bg_color20 !== undefined) objectData.bg_color20 = this.bg_color20;
@@ -386,6 +438,7 @@ export default class HaspObject extends Group {
     exportData.push(objectData);
     this.getChildren().forEach(element => {
       if (element instanceof HaspObject) {
+        // console.log(element.type)
         element.export(page, exportData);
       }
     });

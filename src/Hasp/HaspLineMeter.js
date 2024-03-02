@@ -3,38 +3,61 @@ import { v4 as uuidv4 } from 'uuid';
 
 import HaspObject from './HaspObject';
 import { Rect } from 'konva/lib/shapes/Rect';
+import { range } from '../utils/utils';
 
 export default class HaspLineMeter extends HaspObject {
-    keepRatio = true;
-    canTransform = true;
     hasAction = false;
-    
+    keepRatio = false;
+    canTransform = true;
+
     max = 100;
     min = 0;
     val = 0;
     line_count = 17;
     angle = 240;
+    hasp_rotation = 0;
+    rot_offset = -90;
     hasp_type = 0;
-    value_string;
-    text = '';
+    hasp_type_options = [
+        { value: 0, description: "clock-wise" },
+        { value: 1, description: "counter-clock-wise" }
+    ]
+    // value_string;
+    // text = '';
 
     constructor(config) {
         config.width ??= 100;
         config.height ??= 100;
         config.radius ??= config.width / 2;
+        config.text = config.value_str;
+        // console.log(config.value_str)
+        config.entity_id ??= ''; //make sure this object can set its entityid
         super(config);
+        this.minWidth = 50;
+        this.minHeight = 50;
+        config.hasp_rotation ??= this.hasp_rotation;
+        config.angle ??= this.angle;
+        config.line_count ??= this.line_count;
+        config.min ??= this.min;
+        config.max ??= this.max;
         config.val ??= this.val;
+        this.text = config.text;
         this.text_font = config.text_font;
         this.haspid = config.haspid;
         this.hasp_enabled = true;
+        this.hasp_rotation = config.hasp_rotation;
+        this.angle = config.angle;
+        this.line_count = config.line_count;
         this.val = config.val;
+        this.min = config.min;
+        this.max = config.max;
 
         this.on('transform', function () {
-            if (this.scaleX() === 1) {
-                const rectWidth = this.rect.width();
-                this.rect.height(rectWidth);
-                this.height(rectWidth);
-            }
+            // if (this.scaleX() === 1) {
+            //     const rectWidth = this.rect.width();
+            //     this.rect.height(rectWidth);
+            //     this.height(rectWidth);
+            // }
             this.drawLines();
         });
 
@@ -56,61 +79,49 @@ export default class HaspLineMeter extends HaspObject {
             width: this.width(),
             height: this.height(),
         })
+
         const halfWidth = this.width() / 2;
-        const outerRadius = halfWidth * 0.8;
-        const innerRadius = outerRadius - 15;
-        const step = (this.max - this.min) / this.line_count;
+        // if(this.height() > this.width()){
+        //     halfWidth = this.height() / 2;
+        // }
 
-        let i = this.min;
-        while (i < this.max) {
-            var linecolor = this.theme.tick_color;
-            if(Number(this.hasp_type) === 0 && i < this.val)
-                linecolor=this.theme.primary_color;
-            if(Number(this.hasp_type) === 1 && i > (this.max - this.val))
-                linecolor=this.theme.primary_color;
-            // console.log(i);
-            const angle = (i / this.max) * this.angle;
-            // console.log(angle);
-            let x1 = (Math.cos(angle * (Math.PI / 180)) * innerRadius);
-            let y1 = (Math.sin(angle * (Math.PI / 180)) * innerRadius);
-            let x2 = (Math.cos(angle * (Math.PI / 180)) * outerRadius);
-            let y2 = (Math.sin(angle * (Math.PI / 180)) * outerRadius);
-            this.lineGroup.add(new Konva.Line({
-                x: halfWidth,
-                y: halfWidth,
-                points: [x1, y1, x2, y2],
-                stroke: linecolor,
-                type: 'linemetergroup',
-                strokeWidth: 4,
-                tension: 0,
-                rotation: 90 + ((360 - this.angle) / 2),
-                listening: false,
-            }));
+        const outerRadius = halfWidth * 0.9;
+        const smallInnerRadius = outerRadius - 15;
+        // const majorInnerRadius = outerRadius - 15;
+        // var innerRadius = majorInnerRadius;
 
-            i += step;
-        }
-        if (this.text !== '') {
-            let textObj = new Konva.Text({
-                x: this.width() / 2,
-                height: this.height(),
-                type: 'textobj',
-                // width: this.width(),
-                verticalAlign: 'middle',
-                text: this.text,
-                fontSize: this.theme.font_size,
-                fontFamily: 'Calibri',
-                fill: 'white',
-                listening: false,
-                draggable: true,
-                strokeWidth: 1,
-                align: this.align,
-            });
+        const tickValues = range(this.min, this.max, this.line_count - 1)
+        const majorTicks = range(this.min, this.max, this.label_count - 1)
+        // console.log(majorTicks)
+        var angle = 0;
 
-            textObj.x(halfWidth - (textObj.width() / 2))
+        var linecolor = this.theme.tick_color;
+        const correctionAngle = this.rot_offset - (-this.hasp_rotation) - (this.angle / 2);
+        tickValues.forEach(i => {
+            angle = (((i - this.min) / (this.max - this.min)) * this.angle) + correctionAngle;
+            if (i >= this.critical_value)
+                linecolor = this.theme.primary_color;
+            this.drawTick(angle, halfWidth, halfWidth, smallInnerRadius, outerRadius, 4, linecolor);
+        });
 
-            this.lineGroup.add(textObj)
-        }
         this.add(this.lineGroup);
+    }
+
+    drawTick(angle, x, y, innerRadius, outerRadius, strokeWidth, linecolor) {
+        let x1 = (Math.cos(angle * (Math.PI / 180)) * innerRadius);
+        let y1 = (Math.sin(angle * (Math.PI / 180)) * innerRadius);
+        let x2 = (Math.cos(angle * (Math.PI / 180)) * outerRadius);
+        let y2 = (Math.sin(angle * (Math.PI / 180)) * outerRadius);
+        this.lineGroup.add(new Konva.Line({
+            x: x,
+            y: y,
+            points: [x1, y1, x2, y2],
+            stroke: linecolor,
+            type: 'linemetergroup',
+            strokeWidth: strokeWidth,
+            tension: 0,
+            listening: false,
+        }));
     }
 
     adjust() {
@@ -136,6 +147,8 @@ export default class HaspLineMeter extends HaspObject {
         if (this.val > 0) objectData.val = this.val;
         if (this.line_count > 17) objectData.line_cont = this.line_count;
         if (this.text !== '') objectData.value_str = this.text;
-        if(this.hasp_type !== 0) objectData.type = this.hasp_type;
+        if (this.hasp_type !== 0) objectData.type = this.hasp_type;
+        if (this.angle !== 240) objectData.angle = this.angle;
+        if (this.hasp_rotation > 0) objectData.rotation = this.hasp_rotation;
     }
 }

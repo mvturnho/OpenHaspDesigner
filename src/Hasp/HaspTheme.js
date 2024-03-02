@@ -27,6 +27,8 @@ export default class HaspTheme {
     border_width = 1;
     radius = 5;
 
+    button_radius = 5;
+
     changeListeners = new Array();
 
     addChangeListener(object) {
@@ -34,10 +36,10 @@ export default class HaspTheme {
     }
 
     colorChange(type, color) {
-        console.log(color)
-        console.log(this.layer)
+        // console.log(color)
+        // console.log(this.layer)
         this.changeListeners.forEach(object => {
-            console.log(object.type)
+            // console.log(object.type)
             object.themeChange(type, color);
         });
     }
