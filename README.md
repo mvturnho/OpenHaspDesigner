@@ -52,7 +52,7 @@ The propertiespanel changes with the selected object. so when we have no cornerr
 ## drawing with Konva
 The Konva part makes use of One [ScaleStage](./src/draw/ScaleStage.js) and in this Stage we have a [GridLayer](./src/draw/GridLayer.js). On the Gridlayer we do all the drawing. The ScaleStage handles the zooming and panning.
 
-All OpenHasp objects (the graphical objects) are derived from the baseobject [HaspObject](./src/Hasp/HaspObject.js). The HaspObject has the mayor basics that every object needs;
+All OpenHasp objects (the graphical objects) are derived from the baseobject [HaspObject](./src/Hasp/HaspObject.js). The HaspObject has the major basics that every object needs;
 - id
 - name
 - type (Button, Tabview, Tab etc)
@@ -70,7 +70,7 @@ From the HaspObject we also handle the default drawing en scaling (transformer).
 
 Simple derived objects have a very simple constructor where we set the width and height, color etc. [HaspLed](./src/Hasp//HaspLed.js) is a good example of this.
 
-[HaspLabel](./src/Hasp/HaspLabel.js) that also incorporates text is a bit more complex becouse we add a KonvaText object and also need to manage this.
+[HaspLabel](./src/Hasp/HaspLabel.js) that also incorporates text is a bit more complex because we add a KonvaText object and also need to manage this.
 
 [HaspBar](./src/Hasp/HaspBar.js) Uses extra drawing components and also functionality to support these extra Konva components. 
 
