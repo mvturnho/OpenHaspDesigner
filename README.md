@@ -1,3 +1,7 @@
+# Please use the online version at https://haspdesigner.qrisonline.nl/
+Codebase is behind on the online working version.
+Because of limitations with browser communication with the plates and homeassistant integration with Tauri is currently under development.
+
 # openhasp-designer
 
 Webbased OpenHasp designer. 
