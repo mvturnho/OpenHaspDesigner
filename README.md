@@ -4,6 +4,9 @@ Because of limitations with browser communication with the plates and homeassist
 
 Integration with Tauri (https://v2.tauri.app/) is currently under development.
 
+![image](https://github.com/user-attachments/assets/2c2d1e8c-a31e-406b-84d9-0adad3c66755)
+
+
 # openhasp-designer
 
 Webbased OpenHasp designer. 
