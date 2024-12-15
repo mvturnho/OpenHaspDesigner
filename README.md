@@ -1,6 +1,8 @@
 # Please use the online version at https://haspdesigner.qrisonline.nl/
 Codebase is behind on the online working version.
-Because of limitations with browser communication with the plates and homeassistant integration with Tauri is currently under development.
+Because of limitations with browser communication with the plates and homeassistant.
+
+Integration with Tauri (https://v2.tauri.app/) is currently under development.
 
 # openhasp-designer
 
