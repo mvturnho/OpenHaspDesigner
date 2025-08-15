@@ -6,7 +6,9 @@ Integration with Tauri (https://v2.tauri.app/) is currently under development.
 
 ![image](https://github.com/user-attachments/assets/23a2d104-3185-47f5-9483-ec57bcf0deff)
 
+You may now download the desktop app and have direct control over your plates
 
+https://haspdesigner.qrisonline.nl/haspdesktop/haspdesktop_0.3.1_x64-setup.exe
 
 # openhasp-designer
 
