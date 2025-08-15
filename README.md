@@ -2,13 +2,15 @@
 Codebase is behind on the online working version.
 Because of limitations with browser communication with the plates and homeassistant.
 
-Integration with Tauri (https://v2.tauri.app/) is currently under development.
+You may now download the desktop application and have direct control over your plates
+
+[Download HaspDesktop Windows installer](https://haspdesigner.qrisonline.nl/haspdesktop/haspdesktop_0.3.1_x64-setup.exe)
 
 ![image](https://github.com/user-attachments/assets/23a2d104-3185-47f5-9483-ec57bcf0deff)
 
 You may now download the desktop app and have direct control over your plates
 
-https://haspdesigner.qrisonline.nl/haspdesktop/haspdesktop_0.3.1_x64-setup.exe
+
 
 # openhasp-designer
 
