@@ -2,7 +2,15 @@
 Codebase is behind on the online working version.
 Because of limitations with browser communication with the plates and homeassistant.
 
-<img width="2925" height="1848" alt="image" src="https://github.com/user-attachments/assets/645ff32b-748a-455f-8919-e90a15a88d87" />
+You may now download the desktop application and have direct control over your plates
+
+[Download HaspDesktop Windows installer](https://haspdesigner.qrisonline.nl/haspdesktop/haspdesktop_0.3.1_x64-setup.exe)
+
+![image](https://github.com/user-attachments/assets/23a2d104-3185-47f5-9483-ec57bcf0deff)
+
+You may now download the desktop app and have direct control over your plates
+
+
 
 # openhasp-designer
 
